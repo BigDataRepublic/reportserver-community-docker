@@ -1,0 +1,28 @@
+---
+- hosts: all
+  tasks:
+    - name: Install dependencies
+      pacman:
+        name: jre8-openjdk, tomcat8, mariadb, unzip, wget, supervisor, sed
+    - name: download Reportserver community
+      get_url:
+        url: https://sourceforge.net/projects/dw-rs/files/latest/download
+        dest: /tmp/assets/rs.zip
+        mode: 0440
+        timeout: 300
+    - name: Create RS webapp directory
+      file:
+        path: /var/lib/tomcat8/webapps/rs
+        state: directory
+    - name: Extract Reportserver
+      unarchive:
+        src: /tmp/assets/rs.zip
+        dest: /var/lib/tomcat8/webapps/rs
+    - name: Update configuration
+      copy:
+        src: /tmp/assets/persistence.properties
+        dest: /var/lib/tomcat8/webapps/rs/WEB-INF/classes
+    - name: Create tomcat/tomcat user
+      copy:
+        src: /tmp/assets/tomcat-users.xml
+        dest: /etc/tomcat8
